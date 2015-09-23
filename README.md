@@ -8,4 +8,5 @@ Many severe events can result in fatalities, injuries, and property damage, and 
 Through the _date range_ and _event types_, on the side bar, you can interact with the graph on the **By year** tab.
 
 The database has been obtained from [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2).
+
 Source code for the project is available on the [GitHub](https://github.com/jgfelixribeiro/Developing_Data_Products).
