@@ -10,3 +10,5 @@ Through the _date range_ and _event types_, on the side bar, you can interact wi
 The database has been obtained from [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2).
 
 Source code for the project is available on the [GitHub](https://github.com/jgfelixribeiro/Developing_Data_Products).
+
+Presentation of the Shiny application is available on the [RPubs](http://rpubs.com/jgfelixribeiro/DevelopingDataProducts).

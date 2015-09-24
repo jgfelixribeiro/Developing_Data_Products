@@ -1,26 +1,21 @@
 library(shiny)
 library(ggplot2)
 library(data.table)
-library(maps)
-library(rCharts)
-library(reshape2)
 library(markdown)
-library(mapproj)
 
-#stateMap <- map_data("state")
-dt <- fread('data/events.agg.csv')
-dt$EVTYPE <- tolower(dt$EVTYPE)
-eventTypes <<- sort(unique(dt$EVTYPE))
+stormDataTable <- fread('data/events.agg.csv')
+stormDataTable$EVTYPE <- tolower(stormDataTable$EVTYPE)
+eventTypes <<- sort(unique(stormDataTable$EVTYPE))
 
 shinyServer(function(input, output)
 {
-  output$evtypeControls <- renderUI({
+  output$eventTypeControl <- renderUI({
     checkboxGroupInput('eventTypes', 'Event types', eventTypes, selected = eventTypes)
   })
   
-  dt.agg.year <-
+  stormDataTable.agg.year <-
     reactive({
-      dt[YEAR >= input$range[1] &
+      stormDataTable[YEAR >= input$range[1] &
            YEAR <= input$range[2] & EVTYPE %in% input$eventTypes,
          list(
            COUNT = sum(COUNT),INJURIES = sum(INJURIES),PROPDMG = round(sum(PROPDMG), 2),FATALITIES =
@@ -30,50 +25,50 @@ shinyServer(function(input, output)
     })
   
   
-  output$eventsByYear <- renderChart({
-    data <- dt.agg.year()[, list(COUNT = sum(COUNT)), by = list(YEAR)]
+  output$graphEvents <- renderChart({
+    data <- stormDataTable.agg.year()[, list(COUNT = sum(COUNT)), by = list(YEAR)]
     setnames(data, c('YEAR', 'COUNT'), c("Year", "Count"))
     
-    eventsByYear <-
+    graphEvents <-
       nPlot(
-        Count ~ Year,data = data[order(data$Year)],type = "lineChart", dom = 'eventsByYear', width = 650
+        Count ~ Year,data = data[order(data$Year)],type = "multiBarChart", dom = 'graphEvents', width = 650
       )
     
-    eventsByYear$chart(margin = list(left = 100))
-    eventsByYear$yAxis(axisLabel = "Count", width = 80)
-    eventsByYear$xAxis(axisLabel = "Year", width = 70)
-    return(eventsByYear)
+    graphEvents$chart(margin = list(left = 100))
+    graphEvents$yAxis(axisLabel = "Count", width = 80)
+    graphEvents$xAxis(axisLabel = "Year", width = 70)
+    return(graphEvents)
   })
   
-  output$populationImpact <- renderChart({
+  output$graphPopulation <- renderChart({
     data <-
-      melt(dt.agg.year()[, list(Year = YEAR, Injuries = INJURIES, Fatalities =
+      melt(stormDataTable.agg.year()[, list(Year = YEAR, Injuries = INJURIES, Fatalities =
                                   FATALITIES)],id = 'Year')
-    populationImpact <-
+    graphPopulation <-
       nPlot(
         value ~ Year, group = 'variable', data = data[order(-Year, variable, decreasing = T)],
-        type = 'stackedAreaChart', dom = 'populationImpact', width = 650
+        type = 'stackedAreaChart', dom = 'graphPopulation', width = 650
       )
     
-    populationImpact$chart(margin = list(left = 100))
-    populationImpact$yAxis(axisLabel = "Affected", width = 80)
-    populationImpact$xAxis(axisLabel = "Year", width = 70)
+    graphPopulation$chart(margin = list(left = 100))
+    graphPopulation$yAxis(axisLabel = "Affected", width = 80)
+    graphPopulation$xAxis(axisLabel = "Year", width = 70)
     
-    return(populationImpact)
+    return(graphPopulation)
   })
   
-  output$economicImpact <- renderChart({
+  output$graphEconomic <- renderChart({
     data <-
-      melt(dt.agg.year()[, list(Year = YEAR, Propety = PROPDMG, Crops = CROPDMG)],id =
+      melt(stormDataTable.agg.year()[, list(Year = YEAR, Propety = PROPDMG, Crops = CROPDMG)],id =
              'Year')
-    economicImpact <- nPlot(
+    graphEconomic <- nPlot(
       value ~ Year, group = 'variable', data = data[order(-Year, variable, decreasing = T)],
-      type = 'stackedAreaChart', dom = 'economicImpact', width = 650
+      type = 'stackedAreaChart', dom = 'graphEconomic', width = 650
     )
-    economicImpact$chart(margin = list(left = 100))
-    economicImpact$yAxis(axisLabel = "Total damage (Million USD)", width = 80)
-    economicImpact$xAxis(axisLabel = "Year", width = 70)
+    graphEconomic$chart(margin = list(left = 100))
+    graphEconomic$yAxis(axisLabel = "Total damage (Million USD)", width = 80)
+    graphEconomic$xAxis(axisLabel = "Year", width = 70)
     
-    return(economicImpact)
+    return(graphEconomic)
   })
 })
